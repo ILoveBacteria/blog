@@ -14,3 +14,19 @@ url = "https://github.com/ILoveBacteria"
 
 [social.params]
 icon = "brand-github"
+
+[[social]]
+identifier = "linkedin"
+name = "Linkedin"
+url = "https://www.linkedin.com/in/moein-arabi/"
+
+[social.params]
+icon = "brand-linkedin"
+
+[[social]]
+identifier = "telegram"
+name = "Telegram"
+url = "https://t.me/moein_arabi"
+
+[social.params]
+icon = "brand-telegram"
