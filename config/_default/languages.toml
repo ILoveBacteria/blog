@@ -2,5 +2,11 @@
 [en]
 languageName = "English"
 languagedirection = "ltr"
-title = "Example Site"
+title = "Moein Blog"
+weight = 1
+
+[fa]
+languageName = "Persian"
+languagedirection = "rtl"
+title = "معین بلاگ"
 weight = 1
