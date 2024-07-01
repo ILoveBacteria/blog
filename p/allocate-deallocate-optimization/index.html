@@ -1,0 +1,214 @@
+<!doctype html><html lang=fa dir=rtl><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="یک تکه کد golang را که برای حل یک مسئله الگوریتمی نوشته بودم، بررسی می\u200cکنیم"><title>تاثیر Allocate و Deallocate کردن‌های بیهوده بر زمان اجرایی</title>
+<link rel=canonical href=https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/><link rel=stylesheet href=/scss/style.min.0304c6baf04e01a8fe70693791cb744d56a3578a3120a8796cefc66825aa39c7.css><meta property='og:title' content="تاثیر Allocate و Deallocate کردن\u200cهای بیهوده بر زمان اجرایی"><meta property='og:description' content="یک تکه کد golang را که برای حل یک مسئله الگوریتمی نوشته بودم، بررسی می\u200cکنیم"><meta property='og:url' content='https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/'><meta property='og:site_name' content='معین بلاگ'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='leetcode'><meta property='article:tag' content='algorithm'><meta property='article:tag' content='golang'><meta property='article:tag' content='optimization'><meta property='article:tag' content='memory'><meta property='article:published_time' content='2024-06-30T15:30:00+00:00'><meta property='article:modified_time' content='2024-06-30T15:30:00+00:00'><meta property='og:image' content='https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/cover.png'><meta name=twitter:title content="تاثیر Allocate و Deallocate کردن\u200cهای بیهوده بر زمان اجرایی"><meta name=twitter:description content="یک تکه کد golang را که برای حل یک مسئله الگوریتمی نوشته بودم، بررسی می\u200cکنیم"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/cover.png'><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=منو>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hue18089595a8397e81a6898dd44a5b918_869926_300x0_resize_q75_box.JPG width=300 height=300 class=site-logo loading=lazy alt=Avatar></a></figure><div class=site-meta><h1 class=site-name><a href=/>معین بلاگ</a></h1><h2 class=site-description>به صفحه بلاگ شخصی من خوش آمدید.</h2></div></header><ol class=menu-social><li><a href=https://github.com/ILoveBacteria target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://www.linkedin.com/in/moein-arabi/ target=_blank title=Linkedin rel=me><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-linkedin"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4m0 2a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M8 11v5"/><path d="M8 8v.01"/><path d="M12 16v-5"/><path d="M16 16v-3a2 2 0 00-4 0"/></svg></a></li><li><a href=https://t.me/moein_arabi target=_blank title=Telegram rel=me><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 10l-4 4 6 6 4-16-18 7 4 2 2 6 3-4"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>خانه</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>آرشیو</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>جستجو</span></a></li><li class=menu-bottom-section><ol class=menu><li id=i18n-switch><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5h7"/><path d="M9 3v2c0 4.418-2.239 8-5 8"/><path d="M5 9c-.003 2.144 2.952 3.908 6.7 4"/><path d="M12 20l4-9 4 9"/><path d="M19.1 18h-6.2"/></svg>
+<select name=language title=language onchange="window.location.href=this.selectedOptions[0].value"><option value=https://blog.moeinarabi.ir/ selected>Persian</option><option value=https://blog.moeinarabi.ir/en/>English</option></select></li><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>حالت شب</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">فهرست</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#چی-شده-بود>چی شده بود؟</a></li><li><a href=#کد-غیر-بهینه>کد غیر بهینه</a></li><li><a href=#کد-بهینه>کد بهینه</a></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/allocate-deallocate-optimization/><img src=/p/allocate-deallocate-optimization/cover_hu64b42dbdfbcc0730f0993cc09c40d428_22452_800x0_resize_box_3.png srcset="/p/allocate-deallocate-optimization/cover_hu64b42dbdfbcc0730f0993cc09c40d428_22452_800x0_resize_box_3.png 800w, /p/allocate-deallocate-optimization/cover_hu64b42dbdfbcc0730f0993cc09c40d428_22452_1600x0_resize_box_3.png 1600w" width=800 height=269 loading=lazy alt="Featured image of post تاثیر Allocate و Deallocate کردن‌های بیهوده بر زمان اجرایی"></a></div><div class=article-details><header class=article-category><a href=/categories/tip/ style=background-color:#efce4a;color:#fff>نکته</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/allocate-deallocate-optimization/>تاثیر Allocate و Deallocate کردن‌های بیهوده بر زمان اجرایی</a></h2><h3 class=article-subtitle>یک تکه کد golang را که برای حل یک مسئله الگوریتمی نوشته بودم، بررسی می‌کنیم</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Jun 30, 2024</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>مطالعه در 4 دقیقه</time></div></footer></div></header><section class=article-content><h2 id=چی-شده-بود>چی شده بود؟</h2><p>داشتم یکی از مسائل <a class=link href=https://leetcode.com/problems/valid-sudoku/submissions/1304929030/ target=_blank rel=noopener>Leetcode</a> رو با گو حل می‌کردم که بعد از ارسال کردن کد و Accept شدنش، تصمیم گرفتم یکم کدم رو بهینه‌تر کنم.</p><p><img src=/p/allocate-deallocate-optimization/accept1.png width=1700 height=1094 srcset="/p/allocate-deallocate-optimization/accept1_hu6ecf6befe459a5baf1f077b3dfc547db_103468_480x0_resize_box_3.png 480w, /p/allocate-deallocate-optimization/accept1_hu6ecf6befe459a5baf1f077b3dfc547db_103468_1024x0_resize_box_3.png 1024w" loading=lazy alt="نتیجه و آمار اجرای کد اول" class=gallery-image data-flex-grow=155 data-flex-basis=372px></p><p>من همیشه عادت داشتم مسئله‌های الگوریتمی رو با پایتون حل کنم ولی از موقعی که شروع کردم به یاد گرفتن گو، از گو استفاده می‌کنم و همین سطح پایین‌تر بودن گو باعث شده به بهینه‌ بودن بیشتر فکر کنم.</p><h2 id=کد-غیر-بهینه>کد غیر بهینه</h2><p>کدی که برای این مسئله زده بودم رو این پایین می‌بینید. از دیدنش وحشت نکنید 😊 اگر گو بلد نیستید یا کد خیلی طولانیه، قرار نیست بفهمید چیه. صرفا همین رو در نظر داشته باشید که چند حلقه <code>for</code> تو در تو داره که در هر پیمایش یک Hash-map رو دوباره می‌سازه و <cite>زباله روب<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup></cite> عزیز بابد زحمت بکشه Hash-map قبلی رو پاک بکنه.</p><p>همونطور که مشخصه متغیری به اسم <code>seen</code> داریم که چند بار در حال از بین رفتن و ساخته شدن است.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=nf>isValidSudoku</span><span class=p>(</span><span class=nx>board</span> <span class=p>[][]</span><span class=kt>byte</span><span class=p>)</span> <span class=kt>bool</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>row</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>board</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>seen</span> <span class=o>:=</span> <span class=kd>map</span><span class=p>[</span><span class=kt>byte</span><span class=p>]</span><span class=kd>struct</span><span class=p>{}{}</span>
+</span></span><span class=line><span class=cl>		<span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>column</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>row</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=k>if</span> <span class=nx>column</span> <span class=o>==</span> <span class=sc>&#39;.&#39;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=k>continue</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>			<span class=k>if</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>ok</span> <span class=o>:=</span> <span class=nx>seen</span><span class=p>[</span><span class=nx>column</span><span class=p>];</span> <span class=nx>ok</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=k>return</span> <span class=kc>false</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>			<span class=nx>seen</span><span class=p>[</span><span class=nx>column</span><span class=p>]</span> <span class=p>=</span> <span class=kd>struct</span><span class=p>{}{}</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>column</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>column</span> <span class=p>&lt;</span> <span class=mi>9</span><span class=p>;</span> <span class=nx>column</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>seen</span> <span class=o>:=</span> <span class=kd>map</span><span class=p>[</span><span class=kt>byte</span><span class=p>]</span><span class=kd>struct</span><span class=p>{}{}</span>
+</span></span><span class=line><span class=cl>		<span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>row</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>board</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=k>if</span> <span class=nx>row</span><span class=p>[</span><span class=nx>column</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;.&#39;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=k>continue</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>			<span class=k>if</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>ok</span> <span class=o>:=</span> <span class=nx>seen</span><span class=p>[</span><span class=nx>row</span><span class=p>[</span><span class=nx>column</span><span class=p>]];</span> <span class=nx>ok</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=k>return</span> <span class=kc>false</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>			<span class=nx>seen</span><span class=p>[</span><span class=nx>row</span><span class=p>[</span><span class=nx>column</span><span class=p>]]</span> <span class=p>=</span> <span class=kd>struct</span><span class=p>{}{}</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=p>&lt;</span> <span class=mi>9</span><span class=p>;</span> <span class=nx>i</span> <span class=o>+=</span> <span class=mi>3</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=mi>9</span><span class=p>;</span> <span class=nx>j</span> <span class=o>+=</span> <span class=mi>3</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=nx>seen</span> <span class=o>:=</span> <span class=kd>map</span><span class=p>[</span><span class=kt>byte</span><span class=p>]</span><span class=kd>struct</span><span class=p>{}{}</span>
+</span></span><span class=line><span class=cl>			<span class=k>for</span> <span class=nx>k</span> <span class=o>:=</span> <span class=nx>i</span><span class=p>;</span> <span class=nx>k</span> <span class=p>&lt;</span> <span class=nx>i</span><span class=o>+</span><span class=mi>3</span><span class=p>;</span> <span class=nx>k</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=k>for</span> <span class=nx>l</span> <span class=o>:=</span> <span class=nx>j</span><span class=p>;</span> <span class=nx>l</span> <span class=p>&lt;</span> <span class=nx>j</span><span class=o>+</span><span class=mi>3</span><span class=p>;</span> <span class=nx>l</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>					<span class=k>if</span> <span class=nx>board</span><span class=p>[</span><span class=nx>k</span><span class=p>][</span><span class=nx>l</span><span class=p>]</span> <span class=o>==</span> <span class=sc>&#39;.&#39;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>						<span class=k>continue</span>
+</span></span><span class=line><span class=cl>					<span class=p>}</span>
+</span></span><span class=line><span class=cl>					<span class=k>if</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>ok</span> <span class=o>:=</span> <span class=nx>seen</span><span class=p>[</span><span class=nx>board</span><span class=p>[</span><span class=nx>k</span><span class=p>][</span><span class=nx>l</span><span class=p>]];</span> <span class=nx>ok</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>						<span class=k>return</span> <span class=kc>false</span>
+</span></span><span class=line><span class=cl>					<span class=p>}</span>
+</span></span><span class=line><span class=cl>					<span class=nx>seen</span><span class=p>[</span><span class=nx>board</span><span class=p>[</span><span class=nx>k</span><span class=p>][</span><span class=nx>l</span><span class=p>]]</span> <span class=p>=</span> <span class=kd>struct</span><span class=p>{}{}</span>
+</span></span><span class=line><span class=cl>				<span class=p>}</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=kc>true</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=کد-بهینه>کد بهینه</h2><p>در هر پیمایش حلقه نیاز به یک Hash-map خالی بود که به همین خاطر من اومده بودم هر بار یک Hash-map جدید می‌ساختم. حالا کاری که انجام دادم این بود که فقط یک بار اون هم در ابتدای کد این Hash-map رو می‌ساختم و هر بار که نیاز به یک Hash-map خالی داشتم همون رو <code>clear</code> می‌کردم.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-diff data-lang=diff><span class=line><span class=cl>func isValidSudoku(board [][]byte) bool {
+</span></span><span class=line><span class=cl><span class=gi>+	seen := map[byte]struct{}{}
+</span></span></span><span class=line><span class=cl><span class=gi></span>	for _, row := range board {
+</span></span><span class=line><span class=cl><span class=gi>+		clear(seen)
+</span></span></span><span class=line><span class=cl><span class=gi></span><span class=gd>-		seen := map[byte]struct{}{}
+</span></span></span><span class=line><span class=cl><span class=gd></span>		for _, column := range row {
+</span></span><span class=line><span class=cl>			if column == &#39;.&#39; {
+</span></span><span class=line><span class=cl>				continue
+</span></span><span class=line><span class=cl>			}
+</span></span><span class=line><span class=cl>			if _, ok := seen[column]; ok {
+</span></span><span class=line><span class=cl>				return false
+</span></span><span class=line><span class=cl>			}
+</span></span><span class=line><span class=cl>			seen[column] = struct{}{}
+</span></span><span class=line><span class=cl>		}
+</span></span><span class=line><span class=cl>	}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	for column := 0; column &lt; 9; column++ {
+</span></span><span class=line><span class=cl><span class=gi>+		clear(seen)
+</span></span></span><span class=line><span class=cl><span class=gi></span><span class=gd>-		seen := map[byte]struct{}{}
+</span></span></span><span class=line><span class=cl><span class=gd></span>		for _, row := range board {
+</span></span><span class=line><span class=cl>			if row[column] == &#39;.&#39; {
+</span></span><span class=line><span class=cl>				continue
+</span></span><span class=line><span class=cl>			}
+</span></span><span class=line><span class=cl>			if _, ok := seen[row[column]]; ok {
+</span></span><span class=line><span class=cl>				return false
+</span></span><span class=line><span class=cl>			}
+</span></span><span class=line><span class=cl>			seen[row[column]] = struct{}{}
+</span></span><span class=line><span class=cl>		}
+</span></span><span class=line><span class=cl>	}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	for i := 0; i &lt; 9; i += 3 {
+</span></span><span class=line><span class=cl>		for j := 0; j &lt; 9; j += 3 {
+</span></span><span class=line><span class=cl><span class=gi>+			clear(seen)
+</span></span></span><span class=line><span class=cl><span class=gi></span><span class=gd>-			seen := map[byte]struct{}{}
+</span></span></span><span class=line><span class=cl><span class=gd></span>			for k := i; k &lt; i+3; k++ {
+</span></span><span class=line><span class=cl>				for l := j; l &lt; j+3; l++ {
+</span></span><span class=line><span class=cl>					if board[k][l] == &#39;.&#39; {
+</span></span><span class=line><span class=cl>						continue
+</span></span><span class=line><span class=cl>					}
+</span></span><span class=line><span class=cl>					if _, ok := seen[board[k][l]]; ok {
+</span></span><span class=line><span class=cl>						return false
+</span></span><span class=line><span class=cl>					}
+</span></span><span class=line><span class=cl>					seen[board[k][l]] = struct{}{}
+</span></span><span class=line><span class=cl>				}
+</span></span><span class=line><span class=cl>			}
+</span></span><span class=line><span class=cl>		}
+</span></span><span class=line><span class=cl>	}
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	return true
+</span></span><span class=line><span class=cl>}
+</span></span></code></pre></td></tr></table></div></div><p>همین تغییر ریز باعث شد عملکرد کد تغییر محسوسی بکنه:</p><p><img src=/p/allocate-deallocate-optimization/accept2.png width=1713 height=1097 srcset="/p/allocate-deallocate-optimization/accept2_hu98dd05eebb21b277503f0411e6efa0f0_100738_480x0_resize_box_3.png 480w, /p/allocate-deallocate-optimization/accept2_hu98dd05eebb21b277503f0411e6efa0f0_100738_1024x0_resize_box_3.png 1024w" loading=lazy alt="نتیجه و آمار اجرا بعد از بهینه کردن کد" class=gallery-image data-flex-grow=156 data-flex-basis=374px></p><p>پس حواسمون به سیستم-کال‌هایی که بیهوده در روند اجرایی کد وقفه ایجاد می‌کنند باشه.</p><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p>Garbage Collector&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></section><footer class=article-footer><section class=article-tags><a href=/tags/leetcode/>Leetcode</a>
+<a href=/tags/algorithm/>Algorithm</a>
+<a href=/tags/golang/>Golang</a>
+<a href=/tags/optimization/>Optimization</a>
+<a href=/tags/memory/>Memory</a></section><section class=article-lastmod><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<span>آخرین بروزرسانی در Jun 30, 2024 15:30 UTC</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>مطالب مرتبط</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/p/why-git-pull-is-not-good/><div class=article-image><img src=/p/why-git-pull-is-not-good/cover.4c6ae3a2fcc6724b910276c17e537c63_hu614e4f2457196c15a855c81640c79a25_49096_250x150_fill_q75_box_smart1.jpg width=250 height=150 loading=lazy alt="Featured image of post چرا git pull خوب نیست؟!" data-key=why-git-pull-is-not-good data-hash="md5-TGrjovzGckuRAnbBflN8Yw=="></div><div class=article-details><h2 class=article-title>چرا git pull خوب نیست؟!</h2></div></a></article></div></div></aside><div class=disqus-container><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//moeinarabi.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></div><style>.disqus-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding)}</style><script>window.addEventListener("onColorSchemeChange",e=>{typeof DISQUS=="object"&&DISQUS.reset({reload:!0})})</script><footer class=site-footer><section class=copyright>&copy;
+2024 معین بلاگ</section><section class=powerby>میزبانی شده با عشق توسط GitHub Pages<br>قدرت گرفته از <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>قالب <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.26.0>Stack</a></b> ساخته شده توسط <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

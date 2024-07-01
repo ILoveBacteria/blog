@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Markdown on معین بلاگ</title><link>https://blog.moeinarabi.ir/tags/markdown/</link><description>Recent content in Markdown on معین بلاگ</description><generator>Hugo -- gohugo.io</generator><language>fa</language><lastBuildDate>Sat, 22 Jun 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.moeinarabi.ir/tags/markdown/index.xml" rel="self" type="application/rss+xml"/><item><title>چگونه یک متن Markdown بنویسیم؟</title><link>https://blog.moeinarabi.ir/p/markdown/</link><pubDate>Sat, 22 Jun 2024 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/p/markdown/</guid><description>&lt;img src="https://blog.moeinarabi.ir/p/markdown/cover.webp" alt="Featured image of post چگونه یک متن Markdown بنویسیم؟" />&lt;h2 id="مقدمه">مقدمه
+&lt;/h2>&lt;p>احتمالا توی گشت و گذارتون در وب، این لوگوی خوشگل فایل Markdown رو دیدید! یا با فایل‌هایی رو به رو شدید که پسوند &lt;code>md.&lt;/code> داشتن. اینجا می‌خوام یکم درباره‌ی کاربرد Markdown و سینتکس نوشتنش حرف بزنم.&lt;/p>
+&lt;h2 id="چرا-از-markdown-استفاده-کنیم">چرا از Markdown استفاده کنیم؟
+&lt;/h2>&lt;p>شاید براتون عجیب بیاد که چرا باید به خودمون زحمت بدیم تا همچین متنی رو بنویسیم؛ چرا از ادیتورهایی مثل Microsoft Word استفاده نکنیم تا تنها با چند کلیک ساده یه عبارت رو bold کنیم؟&lt;/p>
+&lt;p>اینجا چندتا علت رو بررسی می‌کنیم تا به تفاوت‌هاشون پی ببریم:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>متن Markdown می‌تونه توی هر چیزی استفاده بشه. مثل سایت‌ها، مستندات، کتاب‌ها، ایمیل‌ها و خیلی چیزای دیگه. از این جهت کاربرد گسترده‌تری داره&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>متن Markdown وابسته به پلتفرم نیست. شما می‌تونید Markdown رو در وب یا روی هر دستگاهی با هر سیستم عاملی باز کنید و بخونید. ولی مثلا تجربه منتقل کردن یک فایل Word رو روی دستگاه دیگه‌ای حتما داشتین؛ فونت بهم می‌ریزه، جمله‌ها می‌پرن.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ادیتورهای متنی مثل word دیتا رو به شکل باینری ذخیره می‌کنند و تنها با خود همون ادیتور اجرا میشه ولی اگر یک فایل Markdown داشته باشین به راحتی میشه حتی توی محیط ترمینال بخونیم و تغییر بدیم.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>وب‌سایت‌هایی مثل &lt;a class="link" href="https://github.com" target="_blank" rel="noopener"
+>GitHub&lt;/a> به شکل ویژه‌ای از Markdown پشتیبانی می‌کنن. مثلا اگر با گیت‌هاب کار کرده باشید برای معرفی مخزن خود، فایلی با فرمت Markdown قرار می‌دین.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="سینتکس-نوشتاری-markdown">سینتکس نوشتاری Markdown
+&lt;/h2>&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/markdown/syntax.webp"
+width="1000"
+height="608"
+srcset="https://blog.moeinarabi.ir/p/markdown/syntax_hu533c44cb3552e6f40a875f2bc46d3f40_30582_480x0_resize_q75_h2_box_2.webp 480w, https://blog.moeinarabi.ir/p/markdown/syntax_hu533c44cb3552e6f40a875f2bc46d3f40_30582_1024x0_resize_q75_h2_box_2.webp 1024w"
+loading="lazy"
+alt="محیط یک ادیتور کد برای نوشتن متن مارک داون"
+class="gallery-image"
+data-flex-grow="164"
+data-flex-basis="394px"
+>&lt;/p>
+&lt;p>چندتا از سینتکس‌های ساده رو بررسی می‌کنیم:&lt;/p>
+&lt;h3 id="تیتر">تیتر
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">&lt;span class="gh"># Heading level 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gh">&lt;/span>&lt;span class="gu">## Heading level 2
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">### Heading level 3
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">#### Heading level 4
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">##### Heading level 5
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">###### Heading level 6
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>نتیجه:&lt;/p>
+&lt;h1 id="heading-level-1">Heading level 1
+&lt;/h1>&lt;h2 id="heading-level-2">Heading level 2
+&lt;/h2>&lt;h3 id="heading-level-3">Heading level 3
+&lt;/h3>&lt;h4 id="heading-level-4">Heading level 4
+&lt;/h4>&lt;h5 id="heading-level-5">Heading level 5
+&lt;/h5>&lt;h6 id="heading-level-6">Heading level 6
+&lt;/h6>&lt;h3 id="ضخیم">ضخیم
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">**Bold Text**
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>Bold Text&lt;/strong>&lt;/p>
+&lt;h3 id="مورب">مورب
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">_Italic Text_
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;em>Italic Text&lt;/em>&lt;/p>
+&lt;h3 id="ضخیم-و-مورب">ضخیم و مورب
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">**_Bold and Italic text_**
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>&lt;em>Bold and Italic text&lt;/em>&lt;/strong>&lt;/p>
+&lt;h3 id="لینک">لینک
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">[&lt;span class="nt">Google&lt;/span>](&lt;span class="na">https://www.google.com&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;a class="link" href="https://www.google.com" target="_blank" rel="noopener"
+>Google&lt;/a>&lt;/p>
+&lt;h3 id="جدول">جدول
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">|name|age|
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">|---|---|
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">|moein|21|
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">|ali|20|
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>name&lt;/th>
+&lt;th>age&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>moein&lt;/td>
+&lt;td>21&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ali&lt;/td>
+&lt;td>20&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table></description></item></channel></rss>

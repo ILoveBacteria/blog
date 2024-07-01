@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>معین بلاگ</title><link>https://blog.moeinarabi.ir/</link><description>Recent content on معین بلاگ</description><generator>Hugo -- gohugo.io</generator><language>fa</language><lastBuildDate>Sun, 30 Jun 2024 15:30:00 +0000</lastBuildDate><atom:link href="https://blog.moeinarabi.ir/index.xml" rel="self" type="application/rss+xml"/><item><title>تاثیر Allocate و Deallocate کردن‌های بیهوده بر زمان اجرایی</title><link>https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/</link><pubDate>Sun, 30 Jun 2024 15:30:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/</guid><description>&lt;img src="https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/cover.png" alt="Featured image of post تاثیر Allocate و Deallocate کردن‌های بیهوده بر زمان اجرایی" />&lt;h2 id="چی-شده-بود">چی شده بود؟
+&lt;/h2>&lt;p>داشتم یکی از مسائل &lt;a class="link" href="https://leetcode.com/problems/valid-sudoku/submissions/1304929030/" target="_blank" rel="noopener"
+>Leetcode&lt;/a> رو با گو حل می‌کردم که بعد از ارسال کردن کد و Accept شدنش، تصمیم گرفتم یکم کدم رو بهینه‌تر کنم.&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/accept1.png"
+width="1700"
+height="1094"
+srcset="https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/accept1_hu6ecf6befe459a5baf1f077b3dfc547db_103468_480x0_resize_box_3.png 480w, https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/accept1_hu6ecf6befe459a5baf1f077b3dfc547db_103468_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="نتیجه و آمار اجرای کد اول"
+class="gallery-image"
+data-flex-grow="155"
+data-flex-basis="372px"
+>&lt;/p>
+&lt;p>من همیشه عادت داشتم مسئله‌های الگوریتمی رو با پایتون حل کنم ولی از موقعی که شروع کردم به یاد گرفتن گو، از گو استفاده می‌کنم و همین سطح پایین‌تر بودن گو باعث شده به بهینه‌ بودن بیشتر فکر کنم.&lt;/p>
+&lt;h2 id="کد-غیر-بهینه">کد غیر بهینه
+&lt;/h2>&lt;p>کدی که برای این مسئله زده بودم رو این پایین می‌بینید. از دیدنش وحشت نکنید 😊 اگر گو بلد نیستید یا کد خیلی طولانیه، قرار نیست بفهمید چیه. صرفا همین رو در نظر داشته باشید که چند حلقه &lt;code>for&lt;/code> تو در تو داره که در هر پیمایش یک Hash-map رو دوباره می‌سازه و &lt;cite>زباله روب&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>&lt;/cite> عزیز بابد زحمت بکشه Hash-map قبلی رو پاک بکنه.&lt;/p>
+&lt;p>همونطور که مشخصه متغیری به اسم &lt;code>seen&lt;/code> داریم که چند بار در حال از بین رفتن و ساخته شدن است.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">isValidSudoku&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">board&lt;/span> &lt;span class="p">[][]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="kt">bool&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">row&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">board&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seen&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="kd">map&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">column&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">row&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">column&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="sc">&amp;#39;.&amp;#39;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">ok&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">seen&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">column&lt;/span>&lt;span class="p">];&lt;/span> &lt;span class="nx">ok&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seen&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">column&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">column&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">column&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="mi">9&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">column&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seen&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="kd">map&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">row&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="k">range&lt;/span> &lt;span class="nx">board&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">row&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">column&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="sc">&amp;#39;.&amp;#39;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">ok&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">seen&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">row&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">column&lt;/span>&lt;span class="p">]];&lt;/span> &lt;span class="nx">ok&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seen&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">row&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">column&lt;/span>&lt;span class="p">]]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="mi">9&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">i&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="mi">3&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">j&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">j&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="mi">9&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">j&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="mi">3&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seen&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="kd">map&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">k&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">i&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">k&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="nx">i&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">k&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="nx">l&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">j&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">l&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="nx">j&lt;/span>&lt;span class="o">+&lt;/span>&lt;span class="mi">3&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="nx">l&lt;/span>&lt;span class="o">++&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">board&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">k&lt;/span>&lt;span class="p">][&lt;/span>&lt;span class="nx">l&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="sc">&amp;#39;.&amp;#39;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">_&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">ok&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">seen&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">board&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">k&lt;/span>&lt;span class="p">][&lt;/span>&lt;span class="nx">l&lt;/span>&lt;span class="p">]];&lt;/span> &lt;span class="nx">ok&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">seen&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">board&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nx">k&lt;/span>&lt;span class="p">][&lt;/span>&lt;span class="nx">l&lt;/span>&lt;span class="p">]]&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="kd">struct&lt;/span>&lt;span class="p">{}{}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="کد-بهینه">کد بهینه
+&lt;/h2>&lt;p>در هر پیمایش حلقه نیاز به یک Hash-map خالی بود که به همین خاطر من اومده بودم هر بار یک Hash-map جدید می‌ساختم. حالا کاری که انجام دادم این بود که فقط یک بار اون هم در ابتدای کد این Hash-map رو می‌ساختم و هر بار که نیاز به یک Hash-map خالی داشتم همون رو &lt;code>clear&lt;/code> می‌کردم.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;span class="lnt">47
+&lt;/span>&lt;span class="lnt">48
+&lt;/span>&lt;span class="lnt">49
+&lt;/span>&lt;span class="lnt">50
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-diff" data-lang="diff">&lt;span class="line">&lt;span class="cl">func isValidSudoku(board [][]byte) bool {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">+ seen := map[byte]struct{}{}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">&lt;/span> for _, row := range board {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">+ clear(seen)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">&lt;/span>&lt;span class="gd">- seen := map[byte]struct{}{}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gd">&lt;/span> for _, column := range row {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if column == &amp;#39;.&amp;#39; {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> continue
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if _, ok := seen[column]; ok {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return false
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> seen[column] = struct{}{}
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> for column := 0; column &amp;lt; 9; column++ {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">+ clear(seen)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">&lt;/span>&lt;span class="gd">- seen := map[byte]struct{}{}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gd">&lt;/span> for _, row := range board {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if row[column] == &amp;#39;.&amp;#39; {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> continue
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if _, ok := seen[row[column]]; ok {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return false
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> seen[row[column]] = struct{}{}
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> for i := 0; i &amp;lt; 9; i += 3 {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> for j := 0; j &amp;lt; 9; j += 3 {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">+ clear(seen)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gi">&lt;/span>&lt;span class="gd">- seen := map[byte]struct{}{}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gd">&lt;/span> for k := i; k &amp;lt; i+3; k++ {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> for l := j; l &amp;lt; j+3; l++ {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if board[k][l] == &amp;#39;.&amp;#39; {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> continue
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if _, ok := seen[board[k][l]]; ok {
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return false
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> seen[board[k][l]] = struct{}{}
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return true
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>همین تغییر ریز باعث شد عملکرد کد تغییر محسوسی بکنه:&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/accept2.png"
+width="1713"
+height="1097"
+srcset="https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/accept2_hu98dd05eebb21b277503f0411e6efa0f0_100738_480x0_resize_box_3.png 480w, https://blog.moeinarabi.ir/p/allocate-deallocate-optimization/accept2_hu98dd05eebb21b277503f0411e6efa0f0_100738_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="نتیجه و آمار اجرا بعد از بهینه کردن کد"
+class="gallery-image"
+data-flex-grow="156"
+data-flex-basis="374px"
+>&lt;/p>
+&lt;p>پس حواسمون به سیستم-کال‌هایی که بیهوده در روند اجرایی کد وقفه ایجاد می‌کنند باشه.&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>Garbage Collector&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description></item><item><title>سلام دنیا</title><link>https://blog.moeinarabi.ir/p/hello-world/</link><pubDate>Thu, 27 Jun 2024 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/p/hello-world/</guid><description>&lt;img src="https://blog.moeinarabi.ir/p/hello-world/cover.jpg" alt="Featured image of post سلام دنیا" />&lt;p>سلام دنیا&lt;/p></description></item><item><title>چگونه یک متن Markdown بنویسیم؟</title><link>https://blog.moeinarabi.ir/p/markdown/</link><pubDate>Sat, 22 Jun 2024 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/p/markdown/</guid><description>&lt;img src="https://blog.moeinarabi.ir/p/markdown/cover.webp" alt="Featured image of post چگونه یک متن Markdown بنویسیم؟" />&lt;h2 id="مقدمه">مقدمه
+&lt;/h2>&lt;p>احتمالا توی گشت و گذارتون در وب، این لوگوی خوشگل فایل Markdown رو دیدید! یا با فایل‌هایی رو به رو شدید که پسوند &lt;code>md.&lt;/code> داشتن. اینجا می‌خوام یکم درباره‌ی کاربرد Markdown و سینتکس نوشتنش حرف بزنم.&lt;/p>
+&lt;h2 id="چرا-از-markdown-استفاده-کنیم">چرا از Markdown استفاده کنیم؟
+&lt;/h2>&lt;p>شاید براتون عجیب بیاد که چرا باید به خودمون زحمت بدیم تا همچین متنی رو بنویسیم؛ چرا از ادیتورهایی مثل Microsoft Word استفاده نکنیم تا تنها با چند کلیک ساده یه عبارت رو bold کنیم؟&lt;/p>
+&lt;p>اینجا چندتا علت رو بررسی می‌کنیم تا به تفاوت‌هاشون پی ببریم:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>متن Markdown می‌تونه توی هر چیزی استفاده بشه. مثل سایت‌ها، مستندات، کتاب‌ها، ایمیل‌ها و خیلی چیزای دیگه. از این جهت کاربرد گسترده‌تری داره&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>متن Markdown وابسته به پلتفرم نیست. شما می‌تونید Markdown رو در وب یا روی هر دستگاهی با هر سیستم عاملی باز کنید و بخونید. ولی مثلا تجربه منتقل کردن یک فایل Word رو روی دستگاه دیگه‌ای حتما داشتین؛ فونت بهم می‌ریزه، جمله‌ها می‌پرن.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>ادیتورهای متنی مثل word دیتا رو به شکل باینری ذخیره می‌کنند و تنها با خود همون ادیتور اجرا میشه ولی اگر یک فایل Markdown داشته باشین به راحتی میشه حتی توی محیط ترمینال بخونیم و تغییر بدیم.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>وب‌سایت‌هایی مثل &lt;a class="link" href="https://github.com" target="_blank" rel="noopener"
+>GitHub&lt;/a> به شکل ویژه‌ای از Markdown پشتیبانی می‌کنن. مثلا اگر با گیت‌هاب کار کرده باشید برای معرفی مخزن خود، فایلی با فرمت Markdown قرار می‌دین.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="سینتکس-نوشتاری-markdown">سینتکس نوشتاری Markdown
+&lt;/h2>&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/markdown/syntax.webp"
+width="1000"
+height="608"
+srcset="https://blog.moeinarabi.ir/p/markdown/syntax_hu533c44cb3552e6f40a875f2bc46d3f40_30582_480x0_resize_q75_h2_box_2.webp 480w, https://blog.moeinarabi.ir/p/markdown/syntax_hu533c44cb3552e6f40a875f2bc46d3f40_30582_1024x0_resize_q75_h2_box_2.webp 1024w"
+loading="lazy"
+alt="محیط یک ادیتور کد برای نوشتن متن مارک داون"
+class="gallery-image"
+data-flex-grow="164"
+data-flex-basis="394px"
+>&lt;/p>
+&lt;p>چندتا از سینتکس‌های ساده رو بررسی می‌کنیم:&lt;/p>
+&lt;h3 id="تیتر">تیتر
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">&lt;span class="gh"># Heading level 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gh">&lt;/span>&lt;span class="gu">## Heading level 2
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">### Heading level 3
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">#### Heading level 4
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">##### Heading level 5
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="gu">###### Heading level 6
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>نتیجه:&lt;/p>
+&lt;h1 id="heading-level-1">Heading level 1
+&lt;/h1>&lt;h2 id="heading-level-2">Heading level 2
+&lt;/h2>&lt;h3 id="heading-level-3">Heading level 3
+&lt;/h3>&lt;h4 id="heading-level-4">Heading level 4
+&lt;/h4>&lt;h5 id="heading-level-5">Heading level 5
+&lt;/h5>&lt;h6 id="heading-level-6">Heading level 6
+&lt;/h6>&lt;h3 id="ضخیم">ضخیم
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">**Bold Text**
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>Bold Text&lt;/strong>&lt;/p>
+&lt;h3 id="مورب">مورب
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">_Italic Text_
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;em>Italic Text&lt;/em>&lt;/p>
+&lt;h3 id="ضخیم-و-مورب">ضخیم و مورب
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">**_Bold and Italic text_**
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>&lt;em>Bold and Italic text&lt;/em>&lt;/strong>&lt;/p>
+&lt;h3 id="لینک">لینک
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">[&lt;span class="nt">Google&lt;/span>](&lt;span class="na">https://www.google.com&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;a class="link" href="https://www.google.com" target="_blank" rel="noopener"
+>Google&lt;/a>&lt;/p>
+&lt;h3 id="جدول">جدول
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-md" data-lang="md">&lt;span class="line">&lt;span class="cl">|name|age|
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">|---|---|
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">|moein|21|
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">|ali|20|
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>name&lt;/th>
+&lt;th>age&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>moein&lt;/td>
+&lt;td>21&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>ali&lt;/td>
+&lt;td>20&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table></description></item><item><title>چرا git pull خوب نیست؟!</title><link>https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/</link><pubDate>Tue, 28 May 2024 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/</guid><description>&lt;img src="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/cover.jpg" alt="Featured image of post چرا git pull خوب نیست؟!" />&lt;h2 id="مقدمه">مقدمه
+&lt;/h2>&lt;blockquote>
+&lt;p>چند روز پیش به یه &lt;a class="link" href="https://www.youtube.com/watch?v=xN1-2p06Urc" target="_blank" rel="noopener"
+>ویدیو&lt;/a> با عنوان با حال &amp;ldquo;از &lt;code>git pull&lt;/code> هیچ وقت استفاده نکن&amp;rdquo; بر خوردم. با خودم گفتم مگه چه مشکلی می‌تونه داشته باشه؟&lt;/p>
+&lt;/blockquote>
+&lt;div class="video-wrapper">
+&lt;iframe loading="lazy"
+src="https://www.youtube.com/embed/xN1-2p06Urc"
+allowfullscreen
+title="YouTube Video"
+>
+&lt;/iframe>
+&lt;/div>
+&lt;h2 id="داستان-از-چه-قراره">داستان از چه قراره؟
+&lt;/h2>&lt;p>داستان از این قراره که همه ما وقتی میخوایم آخرین تغییرات یه رپو رو از جایی مثل گیتهاب دریافت کنیم، از دستور &lt;code>git pull&lt;/code> استفاده می‌کنیم. این دستور در اصل دوتا دستور در دل یک دستوره. در اصل وقتی ما دستور &lt;code>git pull&lt;/code> رو اجرا می‌کنیم، اون پشت اول دستور &lt;code>git fetch&lt;/code> اجرا میشه که میاد برنچ ریموتی به اسم &lt;code>&amp;lt;origin&amp;gt;/&amp;lt;branch_name&amp;gt;&lt;/code> رو توی سیستم لوکالمون آپدیت می‌کنه و بعد با دستور &lt;code>git merge&lt;/code> این برنچ رو روی برنچ اصلی با نام &lt;code>&amp;lt;branch_name&amp;gt;&lt;/code> مرج می‌کنه.&lt;/p>
+&lt;p>داستان اصلی از اینجا شروع میشه که یک &lt;strong>مرج&lt;/strong> در حال اتفاق افتادنه. حالا اگر یه هم‌تیمی داشته باشیم که روی همون برنچ کامیت زده باشه، اون وقته که اتفاق خوبی نمی‌افته.&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/1.jpg"
+width="1920"
+height="1080"
+srcset="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/1_hu7f1f059bdd49d408a7e8eff8b0ab9e89_85382_480x0_resize_q75_box.jpg 480w, https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/1_hu7f1f059bdd49d408a7e8eff8b0ab9e89_85382_1024x0_resize_q75_box.jpg 1024w"
+loading="lazy"
+alt="زمانی که شما دستور pull را اجرا میکنید ولی کامیت دیگری در رپوی ریموت قرار گرفته"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="426px"
+>&lt;/p>
+&lt;p>مثلا در تصویر بالا، ما یه هم‌گروهی به اسم John داریم که هر دومون از کامیت A شروع به کار کردیم. John زودتر از ما کار خودش رو انجام داده، کامیت C رو اعمال کرده و تغییرات رو پوش کرده. حالا اگر ما بخوایم تغییرات خودمون رو پوش کنیم، گیت ارور میده و از ما می‌خواد که قبلش pull انجام بدیم. اگر توی چنین شرایطی &lt;code>pull&lt;/code> انجام بدیم، حتی اگر هم کانفلیکتی رخ نده، دو برنچ لوکال و ریموت مرج میشن. مثل عکس پایین:&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/2.png"
+width="1920"
+height="1080"
+srcset="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/2_hudd3c283f9ecc285d29ff63134bd35422_167373_480x0_resize_box_3.png 480w, https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/2_hudd3c283f9ecc285d29ff63134bd35422_167373_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="تولید شدن یک کامیت جدید برای merge"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="426px"
+>&lt;/p>
+&lt;p>یعنی یک کامیت اضافه‌تر!&lt;/p>
+&lt;p>حالا همین رو تصور کنید ولی با تعداد رخداد بیشتر. برنچ ما پر میشه از کامیت‌های الکی و اضافی که گراف کامیت‌ها رو کثیف می‌کنه:&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/3.png"
+width="1920"
+height="1080"
+srcset="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/3_hu5d993c4e7b34468467bb0b36864186bf_180873_480x0_resize_box_3.png 480w, https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/3_hu5d993c4e7b34468467bb0b36864186bf_180873_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="شلوغ شدن گراف کامیت از کامیت های مرج"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="426px"
+>&lt;/p>
+&lt;p>نکته اینجاست که کانفلیکتی هم اگر نداشته باشیم، این اتفاق می‌افته. پس راه بهتر این جور موقع‌ها چیه؟&lt;/p>
+&lt;h2 id="راه-بهتر">راه بهتر
+&lt;/h2>&lt;p>به جای اینکه &lt;code>pull&lt;/code> انجام بدیم و مرج اتفاق بیفته، &lt;code>rebase&lt;/code> می‌کنیم. &lt;code>rebase&lt;/code> کردن باعث میشه تغییرات برنچ ریموت پشت سر کامیت ما قرار بگیره:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">git pull --rebase
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/4.png"
+width="1920"
+height="1080"
+srcset="https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/4_hue9b66f995038dcf602fac01ead2b1526_159610_480x0_resize_box_3.png 480w, https://blog.moeinarabi.ir/p/why-git-pull-is-not-good/4_hue9b66f995038dcf602fac01ead2b1526_159610_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="بازسازی برنچ لوکال با کامیت های جدید در برنچ ریموت"
+class="gallery-image"
+data-flex-grow="177"
+data-flex-basis="426px"
+>&lt;/p>
+&lt;p>حالا ممکنه سوال پیش بیاد اگر کانفلیکت داشتیم چطور؟&lt;/p>
+&lt;p>ناچارن از همون دستور &lt;code>git pull&lt;/code> استفاده می‌کنیم تا &lt;code>resolve&lt;/code> انجام بدیم و بعدش هم مرج.&lt;/p></description></item><item><title>آرشیو</title><link>https://blog.moeinarabi.ir/archives/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/archives/</guid><description/></item><item><title>ساختن و اجرا کردن فایل jar در زبان جاوا</title><link>https://blog.moeinarabi.ir/p/jar-file/</link><pubDate>Tue, 01 Mar 2022 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/p/jar-file/</guid><description>&lt;img src="https://blog.moeinarabi.ir/p/jar-file/cover.webp" alt="Featured image of post ساختن و اجرا کردن فایل jar در زبان جاوا" />&lt;h2 id="مقدمه">مقدمه
+&lt;/h2>&lt;p>فرض کنید به عنوان یک توسعه‌دهنده می‌خواهید پروژه خودتون رو برای استفاده کاربر منتشر کنید. آیا پروژتون رو با ده‌ها یا صدها کلاس نوشته شده در فولدرهای مختلف در اختیار کاربر قرار می‌دید؟ نه! اینجاست که باید با &lt;code>jar&lt;/code> آشنا بشید.
+فایل &lt;code>jar&lt;/code> یک فایل فشرده‌شده است که کلاس‌های جاوا، عکس، متن و&amp;hellip; به همراه فایل &lt;em>Manifest&lt;/em>(در ادامه بهش می‌رسیم) را در خود جای می‌دهد و از فرمت‌های فشرده‌سازی مانند &lt;code>zip&lt;/code> استفاده می‌کند.&lt;/p>
+&lt;h2 id="ساختن-فایل-jar">ساختن فایل &lt;code>jar&lt;/code>
+&lt;/h2>&lt;p>برای شروع اول مطمئن بشید که &lt;code>JDK&lt;/code> روی سیستمتون نصب است. از این &lt;a class="link" href="https://l.vrgl.ir/r?ad=1&amp;amp;l=https%3A%2F%2Fwww.oracle.com%2Fjava%2Ftechnologies%2Fdownloads%2F&amp;amp;si=dawcnbxn3zqy&amp;amp;st=post&amp;amp;u=jydctt1aaupa&amp;amp;k=zEhPRO4HIYSTabDANP4zEr7E9E4aFaYnCnHop7PF99I%3D" target="_blank" rel="noopener"
+>لینک&lt;/a> می‌تونید نسخه مورد نظرتون رو دانلود کنید.
+برای ساخت فایل &lt;code>jar&lt;/code> کافیست به فولدری که فایل‌ها و کلاس‌ها قرار گرفته‌اند برویم و با دستور زیر در محیط ترمینال فایل &lt;code>jar&lt;/code> ساخته می‌شود:&lt;/p>
+&lt;p>Syntax:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -cf jarfilename inputfiles
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>jarfilename&lt;/code>: نام فایل خروجی&lt;/li>
+&lt;li>&lt;code>inputfiles&lt;/code>: نام فایل‌هایی است که قرار است فشرده شوند&lt;/li>
+&lt;li>&lt;code>-c&lt;/code>: یک فایل آرشیو خالی و جدید می‌سازد&lt;/li>
+&lt;li>&lt;code>-f&lt;/code>: مشخص می‌کند پس از آن، نام فایل خروجی به عنوان پارامتر دریافت شود&lt;/li>
+&lt;/ul>
+&lt;h2 id="مثال-از-ساخت-فایل-jar">مثال از ساخت فایل &lt;code>jar&lt;/code>
+&lt;/h2>&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/jar-file/command.webp"
+width="792"
+height="492"
+srcset="https://blog.moeinarabi.ir/p/jar-file/command_huc7f5d17614156dbe7d8504860574f6cd_22414_480x0_resize_q75_h2_box_2.webp 480w, https://blog.moeinarabi.ir/p/jar-file/command_huc7f5d17614156dbe7d8504860574f6cd_22414_1024x0_resize_q75_h2_box_2.webp 1024w"
+loading="lazy"
+alt="نمونه‌ای از اجرا کردن دستور jar"
+class="gallery-image"
+data-flex-grow="160"
+data-flex-basis="386px"
+>&lt;/p>
+&lt;p>در اینجا ما با دو فایل &lt;code>JavaClass1.class&lt;/code> و &lt;code>JavaClass2.class&lt;/code> روبه‌رو هستیم و با دستور زیر یک فایل &lt;code>jar&lt;/code> ساخته شده:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -cvf export.jar *.class
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>استفاده از &lt;code>v-&lt;/code> فرایند فشرده‌سازی را در خروجی نمایش می‌دهد.
+اگر تعداد زیادی فایل کلاس را می‌خواهید در فایل &lt;code>jar&lt;/code> قرار دهید می‌توانید از &lt;code>class.*&lt;/code> استفاده کنید به جای اینکه تک تک نام فایل‌ها را بنویسید.&lt;/p>
+&lt;h2 id="مشاهده-محتوای-فایل-jar">مشاهده محتوای فایل &lt;code>jar&lt;/code>
+&lt;/h2>&lt;p>پس از آنکه یک فایل &lt;code>jar&lt;/code> بدست آمد، برای دیدن فایل‌های موجود در آن از دستور زیر استفاده می‌شود:&lt;/p>
+&lt;p>Syntax:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -tf jarfilename
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Example:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">jar -tf export.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>خروجی:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">META-INF/
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">META-INF/MANIFEST.MF
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">JavaClass1.class
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">JavaClass2.class
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>یک فایل &lt;code>jar&lt;/code> به طور پیش فرض دارای فایل Manifest می‌باشد و همیشه در فولدر &lt;code>META-INF&lt;/code> قرار دارد.&lt;/p>
+&lt;h2 id="استخراج-کردن-فایل-jar">استخراج کردن فایل &lt;code>jar&lt;/code>
+&lt;/h2>&lt;p>برای extract کردن از دستور زیر استفاده می‌شود:&lt;/p>
+&lt;p>Syntax:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -xf jarfilename
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Example:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">jar -xf export.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>برای extract کردن حتی می‌توان از ابزارهایی که یک فایل &lt;code>zip&lt;/code> را extract می‌کنند، استفاده کرد.&lt;/p>
+&lt;h2 id="آپدیت-کردن-فایل-jar">آپدیت کردن فایل &lt;code>jar&lt;/code>
+&lt;/h2>&lt;p>اگر پروژه‌ی ما یک پروژه‌ی حجیم و بزرگی باشد، پس از تغییراتی که در پروژه اعمال می‌کنیم، برای تبدیل آن به فایل جدید &lt;code>jar&lt;/code> زمان طولانی‌ صرف می‌شود. در اینجا بهتر است به جای ساختن یک فایل جدید &lt;code>jar&lt;/code>، فایل قبلی را آپدیت بکنیم.
+برای آپدیت کردن محتوای فایل از دستور زیر استفاده می‌کنیم:&lt;/p>
+&lt;p>Syntax:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -uf jar-file input-file&lt;span class="o">(&lt;/span>s&lt;span class="o">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">java -uf export.jar *.class
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>بعد از نوشتن نام فایل &lt;code>jar&lt;/code> مورد نظر، فایل‌ها و کلاس‌هایی را که می‌خواهیم آپدیت بکنیم می‌نویسیم. این امکان باعث می‌شود تا به جای اینکه دوباره تمام فایل‌ها را فشرده بکنیم، فقط فایل‌هایی که تغییرات داشتنند را جایگزین فایل‌های قبلی در &lt;code>jar&lt;/code> بکنیم.&lt;/p>
+&lt;h2 id="قابلیت-اجرا-شدن-فایل-jar">قابلیت اجرا شدن فایل &lt;code>jar&lt;/code>
+&lt;/h2>&lt;p>پیش از آنکه یاد بگیریم چگونه یک فایل &lt;code>jar&lt;/code> را اجرا کنیم، باید آن را برای اجرا شدن آماده‌سازی کنیم.
+فرض می‌کنیم در پروژه، کلاسی با نام &lt;code>Main.class&lt;/code> ساخته‌ایم و در آن متد &lt;code>main&lt;/code> را پیاده‌سازی کرده‌ایم. اکنون باید به فایل &lt;code>jar&lt;/code> بفهمانیم که متد &lt;code>main&lt;/code> در چه کلاسی قرار دارد تا هنگام اجرا شدن &lt;code>jar&lt;/code>، آن را اجرا کند. با استفاده از دستور زیر هنگام ساخت فایل &lt;code>jar&lt;/code> این امکان را اضافه می‌کنیم:&lt;/p>
+&lt;p>Syntax:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -cfe jarfilename mainclass import-files
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -cfe export.jar Main client.class server.class logo.jpeg
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>توجه کنید که کلاس &lt;code>Main&lt;/code> بدون &lt;code>class&lt;/code>. نوشته می‌شود.
+روش دیگری هم برای اضافه کردن &lt;code>Main&lt;/code> وجود دارد که در ادامه در مبحت Manifest به آن می‌رسیم.&lt;/p>
+&lt;p>اکنون می‌توان فایل &lt;code>jar&lt;/code> خود را با دستور زیر اجرا کرد:&lt;/p>
+&lt;p>Syntax:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">java -jar jarfilename
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">java -jar export.jar
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="فایل-manifest">فایل Manifest
+&lt;/h2>&lt;p>زمانی که یک فایل &lt;code>jar&lt;/code> ساخته می‌شود به صورت اتوماتیک در آن فایل Manifast هم ساخته می‌شود. حالا اصلا Manifast چی است؟&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/jar-file/manifest2.webp"
+width="406"
+height="132"
+srcset="https://blog.moeinarabi.ir/p/jar-file/manifest2_hu998a0a3c6585db5745b30018c6242c98_6356_480x0_resize_q75_h2_box_2.webp 480w, https://blog.moeinarabi.ir/p/jar-file/manifest2_hu998a0a3c6585db5745b30018c6242c98_6356_1024x0_resize_q75_h2_box_2.webp 1024w"
+loading="lazy"
+alt="نمونه‌ای از فایل Manifest"
+class="gallery-image"
+data-flex-grow="307"
+data-flex-basis="738px"
+>&lt;/p>
+&lt;p>هر فایل &lt;code>jar&lt;/code> یک فایل Manifest دارد که جزئیات و اطلاعات آن در Manifest نوشته شده است. نام این فایل به صورت پیش فرض &lt;code>MANIFEST.MF&lt;/code> نام‌گذاری شده و در فولدر &lt;code>META-INF&lt;/code> قرار دارد. در تصویر بالا نمونه‌ای از این فایل آمده‌است؛ حتی می‌تواند شامل جزئیات بیشتری باشد.
+ورودی فایل Manifest از دو قسمت تشکیل شده است، نام و مقدار. نوشتن نام و مقدارهای Manifest چند نکته دارد که به آن می‌پردازیم:
+باید یک اسپیس پس از &lt;code>&amp;quot;:&amp;quot;&lt;/code> و قبل از مقدار باشد.
+بعد از آخرین خط، یک خط باید خالی باشد.
+متن باید از انکودر UTF-8 استفاده کند.
+وقتی کلاس &lt;code>main&lt;/code> را مشخص می‌کنیم نباید پسوند &lt;code>class.&lt;/code> را پس از آن بنویسیم.&lt;/p>
+&lt;h2 id="آپدیت-کردن-فایل-manifest">آپدیت کردن فایل Manifest
+&lt;/h2>&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/jar-file/manifest.png"
+width="419"
+height="151"
+srcset="https://blog.moeinarabi.ir/p/jar-file/manifest_hu492df2e3b1d191d558e7c8fd8b39b88c_6973_480x0_resize_box_3.png 480w, https://blog.moeinarabi.ir/p/jar-file/manifest_hu492df2e3b1d191d558e7c8fd8b39b88c_6973_1024x0_resize_box_3.png 1024w"
+loading="lazy"
+alt="نمونه‌ای از فایل تکست که برای آپدیت کردن Manifest نوشته شده"
+class="gallery-image"
+data-flex-grow="277"
+data-flex-basis="665px"
+>&lt;/p>
+&lt;p>اگر فایل &lt;code>jar&lt;/code> را ساخته‌ایم و می‌خواهیم تغییراتی روی فایل Manifest بدهیم؛ ابتدا یک فایل &lt;code>txt.&lt;/code> می‌سازیم و سپس برای اعمال تغییرات از دستور زیر استفاده می‌کنیم:&lt;/p>
+&lt;p>Example:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">jar -ufm export.jar manifest.txt
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>شناساندن کلاس &lt;code>main&lt;/code> از طریق Manifest
+در قسمت‌های بالاتر توضیح داده شد که چگونه هنگام ساخت یک فایل &lt;code>jar&lt;/code>، کلاس &lt;code>main&lt;/code> را برای اجرا شدن به آن اضافه کنیم. حال اگر فایل &lt;code>jar&lt;/code> را قبلا ساخته باشیم و کلاس &lt;code>main&lt;/code> را به آن اضافه نکرده باشیم، کافیست خط زیر را به فایل Manifest اضافه کنیم:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-txt" data-lang="txt">&lt;span class="line">&lt;span class="cl">Main-Class: Main
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>حتما دقت کنید که &lt;code>class.&lt;/code> پس از آن را نباید بنویسیم.&lt;/p>
+&lt;h2 id="استفاده-از-ide">استفاده از IDE
+&lt;/h2>&lt;p>تا به این جا با &lt;code>jar&lt;/code> و با انواع دستورهاش آشنا شدیم. اگر پروژه‌ی ما از کتابخانه‌های خارجی استفاده می‌کرد، قرار دادن این کتابخانه‌ها در فایل &lt;code>jar&lt;/code> کمی پیچیده می‌شد. محیط‌های توسعه قابلیت‌های پیشرفته‌ای در اختیارمان قرار می‌دهند که کار را برای ما ساده‌تر می‌کنند. در این قسمت ساختن یک فایل &lt;code>jar&lt;/code> را در IntelliJ بررسی می‌کنیم.&lt;/p>
+&lt;p>&lt;img src="https://blog.moeinarabi.ir/p/jar-file/ide.gif"
+width="1637"
+height="938"
+srcset="https://blog.moeinarabi.ir/p/jar-file/ide_hu67a6eedb80d30d39f415274587c8f908_2357661_480x0_resize_box_1.gif 480w, https://blog.moeinarabi.ir/p/jar-file/ide_hu67a6eedb80d30d39f415274587c8f908_2357661_1024x0_resize_box_1.gif 1024w"
+loading="lazy"
+alt="فرایند ساخت فایل jar"
+class="gallery-image"
+data-flex-grow="174"
+data-flex-basis="418px"
+>&lt;/p>
+&lt;p>ابتدا از نوار بالا گزینه File را انتخاب می‌کنیم و به قسمت Artifacts می‌رویم.
+روی علامت + و سپس روی &lt;code>jar&lt;/code> کلیک می‌کنیم. گزینه‌ی From modules with dependencies انتخاب می‌کنیم.
+در فیلدهای پیش رو می‌توان کلاس Main را انتخاب کرد.
+در انتها روی OK کلیک می‌کنیم.
+در صفحه اصلی نرم‌افزار از نوار بالا روی Build و سپس Build Artifacts کلیک می‌کنیم.
+فایل &lt;code>jar&lt;/code> مورد نظر را انتخاب کنید تا فرایند ساخت فایل &lt;code>jar&lt;/code> آغاز شود.
+فایل‌های &lt;code>jar&lt;/code> به طور پیش فرض در مسیر &lt;code>out/artifacts&lt;/code> قرار می‌گیرد.&lt;/p>
+&lt;h2 id="منابع">منابع
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://l.vrgl.ir/r?ad=1&amp;amp;l=https%3A%2F%2Fwww.geeksforgeeks.org%2Fworking-with-jar-and-manifest-files-in-java%2F%3Fref%3Dlbp&amp;amp;si=dawcnbxn3zqy&amp;amp;st=post&amp;amp;u=jydctt1aaupa&amp;amp;k=lV3wdmWItJOUS2ZTmu7Mbxi8q768VwYXma3oyBk7%2BvA%3D" target="_blank" rel="noopener"
+>Working with JAR and Manifest files In Java - GeeksforGeeks&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://l.vrgl.ir/r?ad=1&amp;amp;l=https%3A%2F%2Fwww.geeksforgeeks.org%2Fjar-files-java%2F&amp;amp;si=dawcnbxn3zqy&amp;amp;st=post&amp;amp;u=jydctt1aaupa&amp;amp;k=nSUeolF%2BPh3%2BSMBYf8yiWt92qVhKIH%2Fe8smJT3OnP4k%3D" target="_blank" rel="noopener"
+>Jar files in Java - GeeksforGeeks&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://l.vrgl.ir/r?ad=1&amp;amp;l=https%3A%2F%2Fwww.jetbrains.com%2Fhelp%2Fidea%2Fcompiling-applications.html%23package_into_jar&amp;amp;si=dawcnbxn3zqy&amp;amp;st=post&amp;amp;u=jydctt1aaupa&amp;amp;k=ZM3j83yE%2BxkZI%2FTeWl7DsxIk6JrE5v30ukuxTOz5PpE%3D" target="_blank" rel="noopener"
+>Compile and build applications with IntelliJ IDEA | IntelliJ IDEA&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://l.vrgl.ir/r?ad=1&amp;amp;l=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FJAR_%28file_format%29&amp;amp;si=dawcnbxn3zqy&amp;amp;st=post&amp;amp;u=jydctt1aaupa&amp;amp;k=8feSlLXxMomzn5C13zX8DH%2FpN25TZ3dPhrHW%2FuF%2BM04%3D" target="_blank" rel="noopener"
+>JAR (file format) - Wikipedia&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>جستجو</title><link>https://blog.moeinarabi.ir/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://blog.moeinarabi.ir/search/</guid><description/></item></channel></rss>
